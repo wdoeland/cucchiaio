@@ -5,7 +5,10 @@ CREATE TABLE recipe (
     title TEXT NOT NULL,
     serving_size INT NOT NULL CHECK (serving_size > 0),
     instructions TEXT NOT NULL,
-    dietary_options TEXT[] NOT NULL DEFAULT '{}'
+    dietary_options TEXT[] NOT NULL DEFAULT '{}',
+    CONSTRAINT chk_dietary_options_valid CHECK ( -- check that dietary options contains only allowed values
+        dietary_options <@ ARRAY['VEGETARIAN']::text[]
+    )
 );
 -- index for fast search on recipes. normalizes keywords and creates a reversed index.
 CREATE INDEX idx_recipe_instructions_fts
@@ -24,4 +27,4 @@ CREATE TABLE recipe_ingredient (
 -- index for finding ingredients for a recipe
 CREATE INDEX idx_ingredient_recipe ON recipe_ingredient(recipe_id);
 -- index for querying ingredient names
-CREATE INDEX idx_ingredient_name ON recipe_ingredient(name);
+CREATE INDEX idx_ingredient_name ON recipe_ingredient(LOWER(name));

@@ -1,6 +1,6 @@
 # Cucchiaio
 
-Cucchiaio is an app for managing recipes. It is developed as part of an assessment at ABN Amro bank.
+Cucchiaio is an app for managing recipes. It is developed as part of an assessment at ABN Amro bank. I have used Claude to help me with explaining .NET concepts in Spring Boot terms, with generating framework boilerplate and SQL queries.
 
 ## Objective
 
@@ -31,15 +31,15 @@ This section describes the architectural choices made for Cucchiaio.
 - recipes stored in a table, using structured (for recipe IDs, owner IDs, names, servings) data and unstructured and semi-structured data (for dietary restrictions, large searchable instruction text)
 - ingredients per recipe stored in a separate table containing name, quantity and unit.
 - PostgreSQL for database as it is stable, fast and supports unstructured data natively and efficiently
-- Java framework: TODO, probably Spring or similar.
-- Unit tests: TODO, probably JUnit
+- Java framework: Spring Boot, include spring security, JPA, Lombok, springdoc
+- Unit tests: JUnit
 - Integration tests: TODO, undecided if these should be written in Java or in a completely different language to simulate a more realistic integration scenario
 - deployment: simple docker images and docker compose script
 
 ### Database
-We use PostgreSQL for its reliability, speed, ease of use and feature-set. We use Spring JPA (with Hibernate) to create a repository to access the data. We use Flyway for applying migrations. We write database creation by hand so we can optimally use Postgres features for indexing to create a fast application. We use Hibernate's ddl-auto in `validate` mode so we check that the database schema is the same as what is in the Hibernate POJO's.
+We use PostgreSQL for its reliability, speed, ease of use and feature-set. We use Spring JPA (with Hibernate) to create a repository to access the data. We use Flyway for applying migrations. We write database creation by hand so we can optimally use Postgres features for indexing and text search to create a fast application. We use Hibernate's ddl-auto in `validate` mode so we check that the database schema is the same as what is in the Hibernate POJO's. IntelliJ can create POJO's from a database fairly alright.
 
-(note that in .NET I'd use Entity Framework which can do all this built-in in the code, but I am unsure if there's anything in Java that has the same capabilities and is as robust)
+(note that in .NET I'd use Entity Framework which can do all this built-in in the code, but I am unsure if there's anything in Java that has the same capabilities and is as robust. If I had a bit more experience, I'd try to do define everything in the POJO to have all definitions in a single place.)
 
 #### Recipes
 We create a table for the recipes:
@@ -49,7 +49,7 @@ We create a table for the recipes:
 - `title` title of the recipe
 - `serving_size` nr of servings, always > 0
 - `instructions` instructions of the recipe. should be searchable: https://www.postgresql.org/docs/current/textsearch-intro.html
-- `dietary_options` list of dietary information for this recipe (e.g. `vegetarian`). should be filterable
+- `dietary_options` list of dietary information for this recipe (e.g. `vegetarian`). should be filterable. can only be set to specific values, which is forced in both the application and database.
 
 Custom indexes:
 
@@ -62,14 +62,14 @@ We create a table for the ingredients in a recipe:
 
 - `id` auto generated primary key
 - `recipe_id` id of the recipe
-- `name` ingredient name
+- `name` ingredient name. forced to be lowercase for ease of filtering
 - `quantity` amount as numeric with scale of 2, so decimals are possible (e.g. 0.5 clove), optionally null
 - `unit` e.g. gram, ml, cup, clove, pinch, optionally null
 
 Custom indexes:
 
 - `idx_ingredient_recipe` maps ingredient to recipe (besides the constraint in the table itself)
-- `idx_ingredient_name` makes ingredient name query fast
+- `idx_ingredient_name_lower` makes ingredient name query fast on lower case, so we can do case-insensitive matching.
 
 ----
 The ingredients could also be stored as a JSON blob inside the recipe table. We chose to store the ingredients in a separate table for a few reasons:
@@ -91,6 +91,7 @@ Some additional features that might be interesting to implement:
 - add recipe tags
 - add cooking times
 - automatic tests and builds in CI/CD
+- application health checks
 - ...
 
 

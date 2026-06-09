@@ -10,4 +10,4 @@ docker run \
         --rm \
         -e POSTGRES_PASSWORD=cucchiaio \
         -e POSTGRES_USER=cucchiaio \
-        postgres:12 -p 5432
+        postgres:18 -p 5432
