@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: cucchiaio
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:cucchiaio}
+    username: ${DB_USER:cucchiaio}
+    password: ${DB_PASSWORD:cucchiaio}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: ${JWT_SECRET:zm127rg6rKJuHuWYQVrJs2IBgbyDzm9b6LF0yQ004bY=}
