@@ -17,8 +17,5 @@ spring:
     web:
       pageable:
         max-page-size: 50
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret-key: ${JWT_SECRET:zm127rg6rKJuHuWYQVrJs2IBgbyDzm9b6LF0yQ004bY=}
+jwt:
+  secret: ${JWT_SECRET:zm127rg6rKJuHuWYQVrJs2IBgbyDzm9b6LF0yQ004bY=}

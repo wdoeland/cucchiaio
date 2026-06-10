@@ -79,7 +79,37 @@ The ingredients could also be stored as a JSON blob inside the recipe table. We 
 - easier searching for quantities of an ingredient at a later point
 - more consistent when migrating. If new properties need to be added to ingredients, this can be migrated more consistently when in a separate table instead of a JSON blob
 
+## API
 
+The API uses a controller that provides the front-facing REST API. The controller talks to a service that recieves and 
+returns DTO records. This service is responsible for fetching and creating data from/with the repository. The service
+also checks for ownership of recipes. For this ownership the subject from the OIDC provided JWT is used.
+
+### Endpoints
+
+All endpoints are placed under `/api/v1/`.
+
+Try out the API using Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+#### POST /recipe
+
+Create a new recipe owned by the user.
+
+#### GET /recipe/{id}
+
+Get a recipe for a specific ID
+
+#### GET /recipe
+
+Search over recipes
+
+#### PUT /recipe/{id}
+
+Update a recipe that the user owns.
+
+#### DELETE /recipe/{id}
+
+Delete a recipe that the user owns.
 
 ## Additional features
 
@@ -106,8 +136,82 @@ Start a database:
 Start the app:
 `...`
 
+### Authentication
+
+There is a 'default' JWT set up for testing, use JWT.io to create tokens for it using the key:
+`zm127rg6rKJuHuWYQVrJs2IBgbyDzm9b6LF0yQ004bY`
+
+Or use a testing JWT:
+
+User 'Wouter':
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0IiwibmFtZSI6IldvdXRlciIsImlhdCI6MTUxNjIzMDAwMH0.OYcv9RhAM1GCqUK17v56qFL8OayISP6LtC36mYYsIps
+```
+
+User 'Alice':
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjEzMTMxMzEzIiwibmFtZSI6IkFsaWNlIiwiaWF0IjoxNTE2MjMwMDAwfQ.AcGuNZQ9MVDk1nlLDg8Llsmgh8zhqge-qm8q9y1nRXI
+```
+
+### Create a recipe:
+
+```
+POST /api/v1/recipe
+{
+  "title": "Vegan Gulasch",
+  "servingSize": 5,
+  "instructions": "cook the veggie meat. add the veggies. Enjoy!",
+  "dietaryOptions": [
+    "VEGETARIAN"
+  ],
+  "ingredients": [
+    {
+      "name": "veggie meat",
+      "quantity": 500,
+      "unit": "gr"
+    },
+    {
+      "name": "veggies",
+      "quantity": 1,
+      "unit": "kg"
+    }
+  ]
+}
+```
+
+And another recipe:
+```
+POST /api/v1/recipe
+{
+  "title": "Oven Salmon",
+  "servingSize": 2,
+  "instructions": "pre-heat the oven to 200 degrees. season the salmon with salt. cook the salmon in the oven for 40 minutes.",
+  "dietaryOptions": [
+  ],
+  "ingredients": [
+    {
+      "name": "salmon",
+      "quantity": 200,
+      "unit": "gr"
+    },
+    {
+      "name": "salt"
+    }
+  ]
+}
+```
+
+### Retrieve a recipe
+
+`GET /api/v1/recipe/v1/{id}`
+
+### Delete a recipe
+
+`DELETE /api/v1/recipe/{id}` only works if you are the owner of the recipe.
+
 ## Production
 
 1. Set up a postgresql database
-2. Configure a keystore with database credentials and oauth credentials (see `application.yml`)
-3. Run the app
+2. Configure a keystore with database credentials and oauth credentials and configure this in `application.yml`
+3. Deploy the app behind the firewall
+4. Proxy to the internet
