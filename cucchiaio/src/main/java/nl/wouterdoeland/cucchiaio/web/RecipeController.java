@@ -1,12 +1,15 @@
 package nl.wouterdoeland.cucchiaio.web;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import nl.wouterdoeland.cucchiaio.service.RecipeService;
 import nl.wouterdoeland.cucchiaio.web.dto.CreateRecipeRequest;
 import nl.wouterdoeland.cucchiaio.web.dto.RecipeResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,7 +37,7 @@ public class RecipeController {
 
     @Operation(summary = "Create a new recipe")
     @ApiResponse(responseCode = "201", description = "Created new recipe")
-    @ApiResponse(responseCode = "400", description = "Malformed request")
+    @ApiResponse(responseCode = "400", description = "Malformed request", content = @Content())
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RecipeResponse> create(
@@ -48,7 +51,7 @@ public class RecipeController {
 
     @Operation(summary = "Retrieve a recipe by id")
     @ApiResponse(responseCode = "200", description = "Found")
-    @ApiResponse(responseCode = "404", description = "Not found")
+    @ApiResponse(responseCode = "404", description = "Not found", content = @Content())
     @GetMapping("/{id}")
     public RecipeResponse getById(@PathVariable Long id,
                                   @AuthenticationPrincipal Jwt jwt) {
