@@ -101,6 +101,14 @@ Create a new recipe owned by the user.
 
 Get a recipe for a specific ID
 
+#### GET /recipe/search
+
+Search for recipes
+
+#### GET /recipe/mine
+
+List recipes that are owned by the current user
+
 #### GET /recipe
 
 Search over recipes
@@ -214,6 +222,47 @@ POST /api/v1/recipe
 ### Delete a recipe
 
 `DELETE /api/v1/recipe/{id}` only works if you are the owner of the recipe.
+
+### Search for a recipe
+
+```
+GET http://localhost:8080/api/v1/recipe/search?dietary=VEGETARIAN
+```
+
+```
+GET http://localhost:8080/api/v1/recipe/search?servingsLower=4&ingredient=potatoes
+```
+
+```
+GET http://localhost:8080/api/v1/recipe/search?instructions=oven&ingredientExcluded=salmon
+```
+
+### Update a recipe
+
+```
+PUT /api/v1/recipe/1
+{
+  "title": "IMPROVED: Oven Salmon",
+  "servingSize": 2,
+  "instructions": "pre-heat the oven to 200 degrees. season the salmon with juice from the lemons. add salt. cook the salmon in the oven for 40 minutes.",
+  "dietaryOptions": [
+  ],
+  "ingredients": [
+    {
+      "name": "salmon",
+      "quantity": 200,
+      "unit": "gr"
+    },
+    {
+      "name": "salt"
+    },
+    {
+      "name": "Lemon",
+      "quantity": 2
+    }
+  ]
+}
+```
 
 ## Production
 
