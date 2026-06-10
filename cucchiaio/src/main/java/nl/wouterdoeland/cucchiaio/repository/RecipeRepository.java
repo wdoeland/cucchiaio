@@ -1,6 +1,8 @@
 package nl.wouterdoeland.cucchiaio.repository;
 
 import nl.wouterdoeland.cucchiaio.domain.Recipe;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,7 +27,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
      * @param dietaryIncluded Dietary wishes that must be included
      * @param ingredientIncluded Ingredients that must be included
      * @param ingredientExcluded Ingredients that must not be included
-     * @return A list of recipes that match, sorted by the recipe ID. Returns at most 50 recipes.
+     * @return A list of recipes that match, sorted by the recipe ID.
      */
     /*
     Query written by hand, can be ported to specific query in JPA.
@@ -37,7 +39,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
             AND (check if query_parameter_N is null OR compare to query_parameter_N)
         ORDER BY id
 
-    TODO: Add pagination and remove LIMIT: https://thorben-janssen.com/native-queries-with-spring-data-jpa/
     TODO: Sort by text search relevance
      */
     @Query(value = """
@@ -82,15 +83,15 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
                                     AND LOWER(ri.name) = ANY (
                                         SELECT LOWER(x) FROM unnest(CAST(:ingredient_excluded AS text[])) x)))
             ORDER BY r.id
-            LIMIT 50
             """, nativeQuery = true)
-    List<Recipe> search(
+    Slice<Recipe> search(
             @Param("ownerId") String ownerId,
             @Param("instructions") String instructionsQuery,
             @Param("servings_lower") Integer servingsLower,
             @Param("servings_upper") Integer servingsUpper,
             @Param("dietary") String[] dietaryIncluded,
             @Param("ingredient") String[] ingredientIncluded,
-            @Param("ingredient_excluded") String[] ingredientExcluded
+            @Param("ingredient_excluded") String[] ingredientExcluded,
+            Pageable pageable
     );
 }

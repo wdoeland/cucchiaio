@@ -24,13 +24,13 @@ Cucchiaio is a standalone Java application whihc allows users to manage their fa
 
 This section describes the architectural choices made for Cucchiaio.
 
-- main goal: keep the application as simple as possible
 - single controller for all recipe operations
 - supports users. users can search/view other users recipes but can only update and remove their own.
     - users connect over OIDC. to keep it simple, use self-crafted JWTs now, this can be easily swapped for an actual OIDC server later.
 - recipes stored in a table, using structured (for recipe IDs, owner IDs, names, servings) data and unstructured and semi-structured data (for dietary restrictions, large searchable instruction text)
 - ingredients per recipe stored in a separate table containing name, quantity and unit.
-- PostgreSQL for database as it is stable, fast and supports unstructured data natively and efficiently
+- querying for recipes returns a `slice`, so for example infinite scrolling can be supported for recipe search.
+- PostgreSQL for database as it is stable, fast and supports unstructured data natively and eff
 - Java framework: Spring Boot, include spring security, JPA, Lombok, springdoc
 - Unit tests: JUnit
 - Integration tests: TODO, undecided if these should be written in Java or in a completely different language to simulate a more realistic integration scenario
