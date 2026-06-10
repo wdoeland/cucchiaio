@@ -134,6 +134,9 @@ Some additional features that might be interesting to implement:
 - add cooking times
 - application health checks
 - improved (structured) logging
+- include stress tests
+- include web tests using an external HTTP client
+- include keystore examples
 - ...
 
 # Running the app

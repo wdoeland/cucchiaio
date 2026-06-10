@@ -93,6 +93,7 @@ public class RecipeEndToEndIT {
     /**
      * Full CRUD test with ownership tests
      */
+    @Test
     void createThenUpdateThenFetchThenDelete_andTestOwnership() throws Exception {
         String body = """
                 {
@@ -159,7 +160,7 @@ public class RecipeEndToEndIT {
         mockMvc.perform(put("/api/v1/recipe/" + id)
                         .header("Authorization", "Bearer " + BOB_JWT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                        .content(update))
                 .andExpect(status().isForbidden());
 
         // recipe is untouched
@@ -174,8 +175,8 @@ public class RecipeEndToEndIT {
         mockMvc.perform(put("/api/v1/recipe/" + id)
                         .header("Authorization", "Bearer " + ALICE_JWT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isForbidden());
+                        .content(update))
+                .andExpect(status().isOk());
 
         // recipe is changed
         mockMvc.perform(get("/api/v1/recipe/" + id)
@@ -188,7 +189,7 @@ public class RecipeEndToEndIT {
         // Test deleting the recipe
 
         // should REJECT because the recipe is owned by ALICE and the request is coming from BOB
-        mockMvc.perform(post("/api/v1/recipe/" + id)
+        mockMvc.perform(delete("/api/v1/recipe/" + id)
                         .header("Authorization", "Bearer " + BOB_JWT))
                 .andExpect(status().isForbidden());
 
@@ -201,13 +202,153 @@ public class RecipeEndToEndIT {
                 .andExpect(jsonPath("$.ingredients[0].name").value("upgraded veggie meat"));
 
         // should ACCEPT changes because the recipe is owned by ALICE
-        mockMvc.perform(post("/api/v1/recipe/" + id)
-                        .header("Authorization", "Bearer " + BOB_JWT))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/v1/recipe/" + id)
+                        .header("Authorization", "Bearer " + ALICE_JWT))
+                .andExpect(status().isNoContent());
 
         // recipe is gone
         mockMvc.perform(get("/api/v1/recipe/" + id)
                         .header("Authorization", "Bearer " + ALICE_JWT))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Query system tests, including queries from the exercise
+     */
+    @Test
+    void queryRecipes() throws Exception {
+        String gnocchiRecipe = """
+                {
+                  "title": "Gnocchi",
+                  "servingSize": 4,
+                  "instructions": "boil the potatoes. make the gnocchi. add cheese to taste",
+                  "dietaryOptions": [
+                    "VEGETARIAN"
+                  ],
+                  "ingredients": [
+                    {
+                      "name": "potatoes",
+                      "quantity": 0.5,
+                      "unit": "kg"
+                    },
+                    {
+                      "name": "Parmigiano Reggiano"
+                    }
+                  ]
+                }
+                """;
+        String lasagnaRecipe = """
+                {
+                  "title": "Lasagna",
+                  "servingSize": 6,
+                  "instructions": "pre-heat the oven at 180 degrees. chop the veggies. cook the meat and veggies in a pan. lay in a pan with pasta sheets. bake in the oven for 40 minutes.",
+                  "ingredients": [
+                    {
+                      "name": "minced meat",
+                      "quantity": 300,
+                      "unit": "gr"
+                    },
+                    {
+                      "name": "vegetables",
+                      "quantity": 1,
+                      "unit": "kg"
+                    },
+                    {
+                      "name": "onion",
+                      "quantity": 2
+                    },
+                    {
+                      "name": "lasagna sheets",
+                      "quantity": 300,
+                      "unit": "gr"
+                    }
+                  ]
+                }
+                """;
+        String ovenSalmonRecipe = """
+                {
+                   "title": "Oven Salmon",
+                   "servingSize": 2,
+                   "instructions": "pre-heat the oven to 200 degrees. season the salmon with salt. cook the salmon in the oven for 40 minutes.",
+                   "dietaryOptions": [
+                   ],
+                   "ingredients": [
+                     {
+                       "name": "salmon",
+                       "quantity": 200,
+                       "unit": "gr"
+                     },
+                     {
+                       "name": "salt"
+                     }
+                   ]
+                 }
+                """;
+
+        String response = mockMvc.perform(post("/api/v1/recipe")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(gnocchiRecipe))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Gnocchi"))
+                .andExpect(jsonPath("$.ownerId").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        Long gnocchiId = objectMapper.readTree(response).get("id").asLong();
+        response = mockMvc.perform(post("/api/v1/recipe")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(lasagnaRecipe))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Lasagna"))
+                .andExpect(jsonPath("$.ownerId").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        Long lasagnaId = objectMapper.readTree(response).get("id").asLong();
+        response = mockMvc.perform(post("/api/v1/recipe")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ovenSalmonRecipe))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Oven Salmon"))
+                .andExpect(jsonPath("$.ownerId").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        Long ovenSalmonId = objectMapper.readTree(response).get("id").asLong();
+
+        mockMvc.perform(get("/api/v1/recipe/search")
+                        .header("Authorization", "Bearer " + ALICE_JWT))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].title").value("Gnocchi"))
+                .andExpect(jsonPath("$.content[1].title").value("Lasagna"))
+                .andExpect(jsonPath("$.content[2].title").value("Oven Salmon"));
+
+        // "All vegetarian recipes"
+        mockMvc.perform(get("/api/v1/recipe/search")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .param("dietary", "VEGETARIAN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Gnocchi"));
+
+        // "Recipes that can serve 4 persons and have “potatoes” as an ingredient"
+        mockMvc.perform(get("/api/v1/recipe/search")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .param("servingsLower", "4")
+                        .param("ingredient", "potatoes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Gnocchi"));
+
+        // "Recipes without “salmon” as an ingredient that has “oven” in the instructions."
+        mockMvc.perform(get("/api/v1/recipe/search")
+                        .header("Authorization", "Bearer " + ALICE_JWT)
+                        .param("instructions", "oven")
+                        .param("ingredientExcluded", "salmon"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Lasagna"));
     }
 }
