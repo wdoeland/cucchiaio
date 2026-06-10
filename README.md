@@ -2,7 +2,7 @@
 
 # Cucchiaio
 
-Cucchiaio is an app for managing recipes. I have used Claude to help me with explaining .NET concepts in Spring Boot terms, with generating framework boilerplate and SQL queries.
+Cucchiaio is an app for managing recipes.
 
 ## Objective
 
@@ -32,11 +32,13 @@ This section describes the architectural choices made for Cucchiaio.
 - recipes stored in a table, using structured (for recipe IDs, owner IDs, names, servings) data and unstructured and semi-structured data (for dietary restrictions, large searchable instruction text)
 - ingredients per recipe stored in a separate table containing name, quantity and unit.
 - querying for recipes returns a `slice`, so for example infinite scrolling can be supported for recipe search.
-- PostgreSQL for database as it is stable, fast and supports unstructured data natively and eff
+- PostgreSQL for database as it is stable, fast and supports unstructured data natively and efficiently
 - Java framework: Spring Boot, include spring security, JPA, Lombok, springdoc
-- Unit tests: JUnit
-- Integration tests: TODO, undecided if these should be written in Java or in a completely different language to simulate a more realistic integration scenario
+- Unit tests: JUnit with underlying layers mocked
+- Integration tests: JUnit on both the repository and full Spring Boot setup
 - deployment: simple docker images and docker compose script
+
+I have used Claude to help me with explaining .NET concepts in Spring Boot terms, with generating framework boilerplate and SQL queries.
 
 ### Database
 We use PostgreSQL for its reliability, speed, ease of use and feature-set. We use Spring JPA (with Hibernate) to create a repository to access the data. We use Flyway for applying migrations. We write database creation by hand so we can optimally use Postgres features for indexing and text search to create a fast application. We use Hibernate's ddl-auto in `validate` mode so we check that the database schema is the same as what is in the Hibernate POJO's. IntelliJ can create POJO's from a database fairly alright.
@@ -91,7 +93,7 @@ also checks for ownership of recipes. For this ownership the subject from the OI
 
 All endpoints are placed under `/api/v1/`.
 
-Try out the API using Swagger UI: http://localhost:8080/swagger-ui/index.html
+Try out the API with documentation and examples using Swagger UI: http://localhost:8080/swagger-ui/index.html
 
 #### POST /recipe
 
@@ -134,14 +136,13 @@ Some additional features that might be interesting to implement:
 - improved (structured) logging
 - ...
 
-
 # Running the app
 
 ## Development
 Run the app with some default credentials as follows:
 
-1. Start a database: `./rundb.sh`
-2. Run or debug from your IDE
+1. Start a temporary database: `./rundb.sh`
+2. Run or debug from your favourite IDE
 
 ## Testing
 Test the app with some default credentials using the docker-compose config:
