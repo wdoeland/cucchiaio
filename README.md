@@ -127,14 +127,18 @@ Some additional features that might be interesting to implement:
 
 # Running the app
 
-## Testing
+## Development
 Run the app with some default credentials as follows:
 
-Start a database:
-`./rundb.sh`
+1. Start a database: `./rundb.sh`
+2. Run or debug from your IDE
 
-Start the app:
-`...`
+## Testing
+Test the app with some default credentials using the docker-compose config:
+
+`docker-compose up`
+
+Go to: `http://localhost:8080/swagger-ui/index.html` and try out the API!
 
 ### Authentication
 
@@ -213,5 +217,6 @@ POST /api/v1/recipe
 
 1. Set up a postgresql database
 2. Configure a keystore with database credentials and oauth credentials and configure this in `application.yml`
-3. Deploy the app behind the firewall
-4. Proxy to the internet
+3. Optionally disable Swagger UI in `application.yml`
+4. Deploy the app behind the firewall
+5. Proxy to the internet
