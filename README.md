@@ -130,8 +130,8 @@ Some additional features that might be interesting to implement:
 - allow users to save other users recipes in their favourites
 - add recipe tags
 - add cooking times
-- automatic tests and builds in CI/CD
 - application health checks
+- improved (structured) logging
 - ...
 
 

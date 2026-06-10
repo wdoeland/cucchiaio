@@ -23,7 +23,9 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - name: Build and test
+      - name: Unit tests
+        run: ./mvnw -B test
+      - name: Integration tests
         run: ./mvnw -B verify
       - name: Upload test reports
         if: always() # upload reports even after failure of previous steps
