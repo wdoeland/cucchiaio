@@ -1,6 +1,8 @@
+[![CI](https://github.com/wdoeland/cucchiaio/actions/workflows/ci.yml/badge.svg)](https://github.com/wdoeland/cucchiaio/actions/workflows/ci.yml)
+
 # Cucchiaio
 
-Cucchiaio is an app for managing recipes. It is developed as part of an assessment at ABN Amro bank. I have used Claude to help me with explaining .NET concepts in Spring Boot terms, with generating framework boilerplate and SQL queries.
+Cucchiaio is an app for managing recipes. I have used Claude to help me with explaining .NET concepts in Spring Boot terms, with generating framework boilerplate and SQL queries.
 
 ## Objective
 

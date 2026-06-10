@@ -3,15 +3,17 @@ name: CI
 # Run on pushes to main and on every pull request targeting it.
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: cucchiaio
     steps:
       - name: Check out code
         uses: actions/checkout@v6
