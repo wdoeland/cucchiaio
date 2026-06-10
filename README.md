@@ -277,7 +277,7 @@ The project includes three test types:
 2. Repository integration tests (run with `mvn verify`)
    - Test if the repository handles the database queries correctly
 3. End-to-end integration tests (run with `mvn verify`)
-   - Test everything: make requests to the HTTP server that flow through the Controller to the Service to the Repository and to the Database and back up.
+   - Test everything: make requests to the Mock MVC server that flow through the Controller to the Service to the Repository and to the Database and back up.
 
 ## Production
 
