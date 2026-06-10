@@ -8,6 +8,11 @@ import jakarta.validation.Valid;
 import nl.wouterdoeland.cucchiaio.service.RecipeService;
 import nl.wouterdoeland.cucchiaio.web.dto.CreateRecipeRequest;
 import nl.wouterdoeland.cucchiaio.web.dto.RecipeResponse;
+import nl.wouterdoeland.cucchiaio.web.dto.RecipeSearchCriteria;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/recipe")
@@ -67,5 +73,23 @@ public class RecipeController {
     public void delete(@PathVariable Long id,
                        @AuthenticationPrincipal Jwt jwt) {
         service.delete(id, userId(jwt));
+    }
+
+    @Operation(summary = "Search for recipes", description = "Search for recipes by entering criteria.")
+    @ApiResponse(responseCode = "200", description = "Found")
+    @ApiResponse(responseCode = "400", description = "Malformed request", content = @Content())
+    @GetMapping("/search")
+    public Slice<RecipeResponse> search(@Valid @ParameterObject RecipeSearchCriteria criteria,
+                                        @PageableDefault(size = 20) @ParameterObject Pageable pageable,
+                                        @AuthenticationPrincipal Jwt jwt) {
+        return service.search(criteria, userId(jwt), pageable);
+    }
+
+    @Operation(summary = "Get all recipes owned by the current user")
+    @ApiResponse(responseCode = "200", description = "Found")
+    @GetMapping("/mine")
+    public Slice<RecipeResponse> getMine(@PageableDefault(size = 20) @ParameterObject Pageable pageable,
+                                         @AuthenticationPrincipal Jwt jwt) {
+        return service.getAllByOwner(userId(jwt), pageable);
     }
 }

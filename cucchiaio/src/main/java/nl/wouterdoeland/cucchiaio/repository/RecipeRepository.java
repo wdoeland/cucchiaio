@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Optional<Recipe> findByIdAndOwnerId(Long id, String ownerId);
 
-    List<Recipe> findAllByOwnerId(String ownerId);
+    Slice<Recipe> findAllByOwnerId(String ownerId, Pageable pageable);
 
     /**
      * Query recipes. All parameters are _optional_. This means that if a paremeter is left out, it will not be filtered for. Query parameters are joined, so all need to match.

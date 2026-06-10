@@ -1,15 +1,16 @@
 package nl.wouterdoeland.cucchiaio.service;
 
+import nl.wouterdoeland.cucchiaio.domain.DietaryOption;
 import nl.wouterdoeland.cucchiaio.domain.Recipe;
 import nl.wouterdoeland.cucchiaio.domain.RecipeIngredient;
 import nl.wouterdoeland.cucchiaio.repository.RecipeRepository;
-import nl.wouterdoeland.cucchiaio.web.dto.CreateRecipeRequest;
-import nl.wouterdoeland.cucchiaio.web.dto.IngredientRequest;
-import nl.wouterdoeland.cucchiaio.web.dto.IngredientResponse;
-import nl.wouterdoeland.cucchiaio.web.dto.RecipeResponse;
+import nl.wouterdoeland.cucchiaio.web.dto.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -55,6 +56,52 @@ public class RecipeService {
     @Transactional(readOnly = true)
     public RecipeResponse get(long id, String userId) {
         return toResponse(getRecipe(id), userId);
+    }
+
+    /**
+     * Get all recipes from a single user
+     * @param userId The owner of the recipes
+     * @param pageable
+     * @return Slice over the recipes owned by this user
+     */
+    @Transactional(readOnly = true)
+    public Slice<RecipeResponse> getAllByOwner(String userId, Pageable pageable) {
+        return repository.findAllByOwnerId(userId, pageable).map(r -> toResponse(r, userId));
+    }
+
+    /**
+     * Search for recipes
+     * @param criteria Criteria to match recipes against
+     * @param userId Id of the user
+     * @param pageable
+     * @return A slice of the recipes found
+     */
+    @Transactional(readOnly = true)
+    public Slice<RecipeResponse> search(RecipeSearchCriteria criteria,
+                                        String userId,
+                                        Pageable pageable) {
+        return repository.search(
+                criteria.myRecipes() == null || !criteria.myRecipes() ? null : userId,
+                criteria.instructions(),
+                criteria.servingsLower(),
+                criteria.servingsUpper(),
+                toStringArrayOrNull(criteria.dietary()),
+                criteria.ingredient(),
+                criteria.ingredientExcluded(),
+                pageable
+        ).map(r -> toResponse(r, userId));
+    }
+
+    /**
+     * Convert an array of dietary options into an array of strings, based on the enum name. Returns null if input is null or empty.
+     * @param dietaryOptions Array of dietary options
+     * @return Array of dietary options as strings or null
+     */
+    private String[] toStringArrayOrNull(DietaryOption[] dietaryOptions) {
+        if (dietaryOptions == null || dietaryOptions.length == 0) {
+            return null;
+        }
+        return Arrays.stream(dietaryOptions).map(Enum::toString).toArray(String[]::new);
     }
 
     /**
