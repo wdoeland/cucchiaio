@@ -109,7 +109,7 @@ class RecipeRepositoryIT extends AbstractPostgresIT {
 
             assertThat(repository.findById(id)).isEmpty();
             // No orphaned ingredient rows: a fresh search returns nothing for it.
-            assertThat(repository.findAllByOwnerId(ALICE))
+            assertThat(repository.findAllByOwnerId(ALICE, FIRST_PAGE))
                     .extracting(Recipe::getId)
                     .doesNotContain(id);
         }
@@ -146,10 +146,10 @@ class RecipeRepositoryIT extends AbstractPostgresIT {
 
         @Test
         void findAllByOwnerId_returnsOnlyThatOwnersRecipes() {
-            assertThat(repository.findAllByOwnerId(ALICE))
+            assertThat(repository.findAllByOwnerId(ALICE, FIRST_PAGE))
                     .extracting(Recipe::getTitle)
                     .containsExactlyInAnyOrder("Baked Salmon", "Lasagna", "Vegetarian Gnocchi");
-            assertThat(repository.findAllByOwnerId(BOB))
+            assertThat(repository.findAllByOwnerId(BOB, FIRST_PAGE))
                     .extracting(Recipe::getTitle)
                     .containsExactly("Bob's Secret Minestrone");
         }

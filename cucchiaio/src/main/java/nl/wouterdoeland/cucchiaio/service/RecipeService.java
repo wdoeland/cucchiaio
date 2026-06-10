@@ -25,13 +25,13 @@ public class RecipeService {
     /**
      * Create a new recipe owned by the user
      * @param request The recipe
-     * @param ownerId The ID of the owner
+     * @param userId The ID of the owner
      * @return The recipe
      */
-    public RecipeResponse create(CreateRecipeRequest request, String ownerId) {
-        Recipe recipe = new Recipe(ownerId, request.title(), request.servingSize(), request.instructions(), request.dietaryOptions());
+    public RecipeResponse create(CreateRecipeRequest request, String userId) {
+        Recipe recipe = new Recipe(userId, request.title(), request.servingSize(), request.instructions(), request.dietaryOptions());
         addIngredients(recipe, request.ingredients());
-        return toResponse(repository.save(recipe), ownerId);
+        return toResponse(repository.save(recipe), userId);
     }
 
     /**
@@ -44,6 +44,31 @@ public class RecipeService {
     public void delete(Long id, String userId) {
         // permanently delete recipe
         repository.delete(getPrivilegedRecipe(id, userId));
+    }
+
+    /**
+     * Update a recipe
+     * @param id Id of the recipe to update
+     * @param update Updated recipe
+     * @param userId Id of the user
+     * @return Updated recipe
+     * @throws RecipeNotFoundException if the recipe was not found
+     * @throws RecipeForbiddenException if the user does not have delete rights to this recipe
+     */
+    public RecipeResponse update(Long id, CreateRecipeRequest update, String userId) {
+        // retrieve recipe in privileged mode
+        Recipe recipe = getPrivilegedRecipe(id, userId);
+        // update all basic properties
+        recipe.setTitle(update.title());
+        recipe.setServingSize(update.servingSize());
+        recipe.setInstructions(update.instructions());
+        recipe.setDietaryOptions(update.dietaryOptions());
+        // remove all ingredients
+        List.copyOf(recipe.getRecipeIngredients()).forEach(recipe::removeIngredient);
+        // add new ingredients
+        addIngredients(recipe, update.ingredients());
+
+        return toResponse(recipe, userId);
     }
 
     /**
@@ -156,7 +181,7 @@ public class RecipeService {
      */
     private RecipeResponse toResponse(Recipe recipe, String userId) {
         List<IngredientResponse> ingredients = recipe.getRecipeIngredients().stream()
-                .map(i -> new IngredientResponse(i.getId(), i.getName(), i.getQuantity(), i.getUnit()))
+                .map(i -> new IngredientResponse(i.getName(), i.getQuantity(), i.getUnit()))
                 .toList();
         return new RecipeResponse(
                 recipe.getId(),

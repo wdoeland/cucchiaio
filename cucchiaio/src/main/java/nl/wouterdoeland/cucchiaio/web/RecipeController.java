@@ -44,8 +44,8 @@ public class RecipeController {
     @Operation(summary = "Create a new recipe")
     @ApiResponse(responseCode = "201", description = "Created new recipe")
     @ApiResponse(responseCode = "400", description = "Malformed request", content = @Content())
-    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
     public ResponseEntity<RecipeResponse> create(
             @Valid @RequestBody CreateRecipeRequest request,
             @AuthenticationPrincipal Jwt jwt) {
@@ -66,13 +66,25 @@ public class RecipeController {
 
     @Operation(summary = "Delete a recipe by id", description = "Removes a recipe if it is found and if the user owns this recipe")
     @ApiResponse(responseCode = "204", description = "Removed")
-    @ApiResponse(responseCode = "404", description = "Not found")
     @ApiResponse(responseCode = "403", description = "Not owned")
+    @ApiResponse(responseCode = "404", description = "Not found")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id,
                        @AuthenticationPrincipal Jwt jwt) {
         service.delete(id, userId(jwt));
+    }
+
+    @Operation(summary = "Update a recipe", description = "Update a recipe that the user owns.")
+    @ApiResponse(responseCode = "201", description = "Created new recipe")
+    @ApiResponse(responseCode = "400", description = "Malformed request", content = @Content())
+    @ApiResponse(responseCode = "403", description = "Not owned")
+    @ApiResponse(responseCode = "404", description = "Not found")
+    @PutMapping("/{id}")
+    public RecipeResponse update(@PathVariable Long id,
+                                 @Valid @RequestBody CreateRecipeRequest update,
+                                 @AuthenticationPrincipal Jwt jwt) {
+        return service.update(id, update, userId(jwt));
     }
 
     @Operation(summary = "Search for recipes", description = "Search for recipes by entering criteria.")
