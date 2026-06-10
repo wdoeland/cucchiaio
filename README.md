@@ -264,6 +264,17 @@ PUT /api/v1/recipe/1
 }
 ```
 
+## Automated Tests
+
+The project includes three test types:
+1. Unit tests (run with `mvn test`)
+   - For the Controller and Service
+   - Mocks the underlying layers
+2. Repository integration tests (run with `mvn verify`)
+   - Test if the repository handles the database queries correctly
+3. End-to-end integration tests (run with `mvn verify`)
+   - Test everything: make requests to the HTTP server that flow through the Controller to the Service to the Repository and to the Database and back up.
+
 ## Production
 
 1. Set up a postgresql database
