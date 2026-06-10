@@ -286,3 +286,7 @@ The project includes three test types:
 3. Optionally disable Swagger UI in `application.yml`
 4. Deploy the app behind the firewall
 5. Proxy to the internet
+
+## Secrets management
+
+This application uses JWTs for authentication purposes. Due to time constraint, and lack of an OIDC server, a set-up using symmetric-signed JWTs was chosen. In a production system (or more advanced development setup), it would be a small configuration change to switch to retrieving keys from an actual OIDC server. If the application is configured as a resource server, it also does not hold any secrets anymore (except database credentials depending on the set-up). The application can use [OIDC auto-discovery](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html). This system automatically retrieves the public keys (and other configuration) from the OIDC server to verify the authenticity of incoming JWTs. Further hardening can be applied to enforce signing algorithms, token audience and token validity.
